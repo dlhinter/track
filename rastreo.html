@@ -1,0 +1,181 @@
+  <!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rastreo de Envíos</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background-color: #fff;
+        }
+        .header {
+            background: linear-gradient(to right, #f7e68b, #ffffff);
+            padding: 30px;
+            display: flex;
+            justify-content: space-between; /* Distribuye los elementos a lo largo del contenedor */
+            align-items: center; /* Centra verticalmente los elementos */
+            position: relative;
+        }
+        
+        .header img.logo {
+            height: 20px;
+        }
+        
+        .header img.menu-icon {
+            height: 30px;
+            cursor: pointer;
+            filter: invert(29%) sepia(96%) saturate(7483%) hue-rotate(357deg) brightness(101%) contrast(105%); /* Cambia el color a rojo */
+        }
+        .title {
+            text-align: center;
+            font-size: 24px;
+            color: #333;
+            margin-top: 10px;
+        }
+        .search-bar {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .search-bar input {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px 0 0 5px;
+            width: 300px;
+            outline: none;
+        }
+        .search-bar button {
+            padding: 10px;
+            font-size: 16px;
+            border: none;
+            background-color: #ff0000;
+            color: white;
+            border-radius: 0 5px 5px 0;
+            cursor: pointer;
+        }
+        .info-box {
+            background-color: #f0f0f0;
+            border: 2px solid #ff0000;
+            margin: 20px auto;
+            padding: 20px;
+            max-width: 600px;
+            border-radius: 5px;
+        }
+        .info-box p {
+            margin: 10px 0;
+            line-height: 1.5;
+        }
+        .info-box .label {
+            font-weight: bold;
+        }
+        .footer {
+            background-color: #f0f0f0;
+            color: #808080;
+            text-align: center;
+            padding: 10px;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="https://www.dhl.com/content/dam/dhl/global/core/images/logos/dhl-logo.svg" alt="Logo de la empresa">
+        <img src="https://img.icons8.com/ios-filled/50/000000/menu--v1.png" class="menu-icon" alt="Menú">
+    </div>
+
+    <div class="title">
+        <h1>Rastreo de Envíos</h1>
+    </div>
+
+    <div class="search-bar">
+        <input type="text" id="tracking-input" placeholder="Ingrese el número de guía">
+        <button onclick="searchTracking()">Rastrear</button>
+    </div>
+
+    <div class="info-box" id="info-box">
+        <p id="error-message" class="error"></p>
+        <p><span class="label">Número de guía:</span> <span id="guide-number"></span></p>
+        <p><span class="label">Nombre del remitente:</span> <span id="sender-name"></span></p>
+        <p><span class="label">Lugar de origen:</span> <span id="origin"></span></p>
+        <p><span class="label">Estado del paquete:</span> <span id="status"></span></p>
+        <p><span class="label">Lugar de destino:</span> <span id="destination"></span></p>
+        <p><span class="label">Ubicación actual:</span> <span id="current-location"></span></p>
+    </div>
+
+    <div class="footer">
+        <p>© 2024 Empresa de Envíos. Todos los derechos reservados.</p>
+    </div>
+
+    <script>
+        const shipments = [
+            { trackingId: '5473442865', senderName: 'FRANCISCA G RAUDALES', origin: 'BOGOTA D.C.', status: 'RETENIDO', destination: '5960 S W 23 ST WEST PARK FL 33023', currentLocation: 'MEXICO D.F. (CDMX)' },
+            { trackingId: '2345678901', senderName: 'MANUEL DE JESUS ORTEGA ESTRADA', origin: 'NEW YORK', status: 'ENVIO EN RUTA DE ENTREGA AL DESTINATARIO', destination: 'Urbanizacion miramontes 4pasje casa 19F lourdes colon la libertad', currentLocation: 'EE.UU.' },
+            { trackingId: '3456789012', senderName: 'SUSANA GUADALUPE ALVARADO CANDRAY', origin: 'NEW YORK', status: 'ENVIO ENTREGADO EMBAJADA DEL SALVADOR', destination: 'Urbanizacion miramontes 4pasje casa 19F lourdes colon la libertad', currentLocation: 'SAN SALVADOR' },
+             { trackingId: '356789012', senderName: 'MIGUEL ANGEL SANCHEZ OVIEDO', origin: 'Washington, D.C.', status: 'ENVIO RETENIDO', destination: 'Av Alfonso Reyes 148, Sin Nombre de Col 25, 66196 Cdad. Santa Catarina, N.L., México', currentLocation: 'Washington, D.C.' },
+             { trackingId: '336789012', senderName: 'ERIBEL GALINDO MORALES MORALES', origin: 'NUEVO MEXICO', status: 'ENVIO EN PROCESO DE ENTREGA AL DESTINATARIO', destination: '6003 9TH ST E.BRADENTON FLORIDA 34203', currentLocation: 'Washington, D.C. ' },
+            { trackingId: '336789112', senderName: 'JORGE PEREZ ARREDONDO', origin: 'NEW YORK', status: 'ENVIO RETENIDO EN ADUANAS', destination: 'Norte 72 #3509 Gustavo.A Medero ,La joya ciudad México cp 07890', currentLocation: 'Washington D.C.' },
+             { trackingId: '336789192', senderName: 'WILBER ALBERTO TORRES MENDEZ', origin: 'NEW YORK', status: 'ENVIO RETENIDO', destination:'Blvr. Sta. Elena, El Salvador', currentLocation: 'El Salvador.' },
+           { trackingId: '336781192', senderName: 'SAUL ARMANDO PORTILLO RAMIREZ', origin: 'SAN SALVADOR', status: 'ENVIO RETENIDO EN ADUANAS DE EL SALVADOR', destination:'San Francisco Mendez, Ahuachapan 2113, El salvador', currentLocation: 'GUATEMALA.' },
+           { trackingId: '336081192', senderName: 'SOLEDAD RAQUEL MORENO ASENCIOS', origin: 'NEW YORK', status: 'ENVIO RETENIDO EN ADUANAS', destination:'Mz Q15 lote 18 jose carlos mariategui  (las galeras) san juan lurigancho', currentLocation: 'Washington D.C.' },
+    
+    
+    
+    
+             // Agregar más datos aquí hasta llegar a 20
+        ];
+
+        function getQueryParam(param) {
+            const urlParams = new URLSearchParams(window.location.search)
+            return urlParams.get(param);
+        }
+
+        function showShipmentInfo(trackingId) {
+            const shipment = shipments.find(shipment => shipment.trackingId === trackingId);
+
+            if (shipment) {
+                document.getElementById('guide-number').textContent = shipment.trackingId;
+                document.getElementById('sender-name').textContent = shipment.senderName;
+                document.getElementById('origin').textContent = shipment.origin;
+                document.getElementById('status').textContent = shipment.status;
+                document.getElementById('destination').textContent = shipment.destination;
+                document.getElementById('current-location').textContent = shipment.currentLocation;
+                document.getElementById('error-message').textContent = '';
+                document.getElementById('info-box').style.display = 'block';
+            } else {
+                document.getElementById('info-box').style.display = 'none';
+                document.getElementById('error-message').textContent = 'Número de guía no válido o no encontrado.';
+            }
+        }
+
+        function searchTracking() {
+            const trackingId = document.getElementById('tracking-input').value;
+            if (trackingId) {
+                showShipmentInfo(trackingId);
+            } else {
+                document.getElementById('info-box').style.display = 'none';
+                document.getElementById('error-message').textContent = 'Número de guía no proporcionado.';
+            }
+        }
+
+        window.onload = function() {
+            const trackingId = getQueryParam('trackingId');
+            if (trackingId) {
+                showShipmentInfo(trackingId);
+            } else {
+                document.getElementById('info-box').style.display = 'none';
+                document.getElementById('error-message').textContent = 'Número de guía no proporcionado.';
+            }
+        }
+    </script>
+</body>
+</html>
